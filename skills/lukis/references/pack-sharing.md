@@ -1,6 +1,6 @@
 # Community character packs — install & publish
 
-The community repo (default `tmchow/illo-characters` on GitHub; override with
+The community repo (default `madearga/lukis-characters` on GitHub; override with
 `--repo` or the `packsRepo` config key, e.g. for a private company repo)
 hosts shareable character packs: `packs/<name>/` with `character.md`,
 `reference.png`, and `preview.png`. The engine talks to it read-only;
@@ -86,7 +86,7 @@ SKILL.md step 5); convert before publishing (`sips -s format png in.jpg
 1. **Render `preview.png`** if the pack has none: one load-bearing *scene*
    (not a pose) with the character performing an idea — this is the review
    artifact reviewers judge.
-2. **Fork + clone:** `gh repo fork tmchow/illo-characters --clone` (skip the
+2. **Fork + clone:** `gh repo fork madearga/lukis-characters --clone` (skip the
    fork if the user has push access). Create a branch `add-<name>`.
 3. **Add the pack:** copy `character.md` + `reference.png` from the local
    pack and `preview.png` into `packs/<name>/`; add a `Credit:` line to
@@ -121,7 +121,7 @@ SKILL.md step 5); convert before publishing (`sips -s format png in.jpg
    ```
 
    Write the body to a file and use `gh pr create --title "feat: add <name>
-   character pack" --body-file <file>` (target repo `tmchow/illo-characters`
-   when on a fork: `--repo tmchow/illo-characters`).
+   character pack" --body-file <file>` (target repo `madearga/lukis-characters`
+   when on a fork: `--repo madearga/lukis-characters`).
 6. Report the PR URL. Publishing is public and licenses the pack under the
    repo's MIT terms — confirm the user understands before pushing.

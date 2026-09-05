@@ -28,7 +28,7 @@ import argparse, base64, getpass, json, mimetypes, os, pathlib, re, shutil, stru
 import urllib.error, urllib.request
 
 ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_PACKS_REPO = "https://raw.githubusercontent.com/tmchow/illo-characters/main"
+DEFAULT_PACKS_REPO = "https://raw.githubusercontent.com/madearga/lukis-characters/main"
 PACK_NAME_RE = re.compile(r"[a-z0-9]+(-[a-z0-9]+)*")
 ALIASES_RE = re.compile(r"^Aliases:\s*(.+)$", re.M)
 CUTOUT_CHROMA_RE = re.compile(r"^Cutout chroma:\s*\*?\*?(green|magenta)\*?\*?\s*$", re.M | re.I)

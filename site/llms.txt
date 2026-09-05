@@ -4,7 +4,7 @@
 
 Site: https://lukis-skill.com/
 Skill repo: https://github.com/madearga/lukis-skill
-Character packs: https://github.com/madearga/lukis-skill (community catalog repo planned; Ciko ships with the skill)
+Character packs: https://github.com/madearga/lukis-characters
 Examples: https://lukis-skill.com/examples.html
 Guide: https://lukis-skill.com/guide.html
 Characters page: https://lukis-skill.com/characters.html
@@ -89,7 +89,7 @@ Prefer the host's **native plugin or skill manager** — same lanes as the [GitH
 
 ## Characters
 
-Ciko ships with the skill — a deadpan house gecko in sablon on the pasar palette (warm cream paper `#f6ecd9`, structure ink `#1d1a15`, chili red `#d4492e`, leaf teal `#1a6e5f`). Community character packs will live in a dedicated catalog repo (planned; Ciko is the first pack).
+Ciko ships with the skill — a deadpan house gecko in sablon on the pasar palette (warm cream paper `#f6ecd9`, structure ink `#1d1a15`, chili red `#d4492e`, leaf teal `#1a6e5f`). Community character packs live in madearga/lukis-characters — Ciko is the first pack.
 
 Fetch the machine-readable list: `https://lukis-skill.com/characters.json`
 
@@ -110,7 +110,7 @@ For destination-specific colors, map the target destination to a palette once, o
 - If no image backend is configured, the engine resolves in order: a usable Codex CLI, else a usable Grok CLI, else Grok Bot host capability, else an OpenRouter key. Outside Grok Bot, run `lukis.py init` to configure OpenRouter when no subscription CLI is signed in.
 - A failed Codex CLI, Grok CLI, or Grok Bot render does not spend OpenRouter money automatically — pass `--allow-paid-fallback` only when the user explicitly permits a paid retry.
 - If a render is off-concept, rerun with a tighter description of the idea and the desired output shape.
-- If a character is unavailable, install its pack by name from the catalog repo once published.
+- If a character is unavailable, install its pack by name from madearga/lukis-characters.
 - If sharing a character, keep private characters local unless the user explicitly wants a community PR.
 
 ## MCP status
