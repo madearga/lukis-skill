@@ -31,6 +31,27 @@
    "description": "a coffee mug, good things steeping",
    "notes": "",
    "preview": "https://raw.githubusercontent.com/madearga/lukis-characters/main/packs/seduh/preview.png"
+  },
+  {
+   "name": "siput",
+   "look": "riso",
+   "description": "a garden snail, slow and steady",
+   "notes": "",
+   "preview": "https://raw.githubusercontent.com/madearga/lukis-characters/main/packs/siput/preview.png"
+  },
+  {
+   "name": "jangkar",
+   "look": "woodcut",
+   "description": "a ship's anchor, holding fast",
+   "notes": "",
+   "preview": "https://raw.githubusercontent.com/madearga/lukis-characters/main/packs/jangkar/preview.png"
+  },
+  {
+   "name": "perisai",
+   "look": "enamel",
+   "description": "a heater shield, nothing gets past it",
+   "notes": "",
+   "preview": "https://raw.githubusercontent.com/madearga/lukis-characters/main/packs/perisai/preview.png"
   }
  ]
 }
