@@ -1,0 +1,13 @@
+{
+  "name": "lukis-skill",
+  "plugins": [
+    {
+      "name": "lukis",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/madearga/lukis-skill"
+      },
+      "category": "creative"
+    }
+  ]
+}

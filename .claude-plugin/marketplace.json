@@ -1,0 +1,23 @@
+{
+  "name": "lukis-skill",
+  "owner": {
+    "name": "I Made Arga Swarsa",
+    "url": "https://github.com/madearga"
+  },
+  "metadata": {
+    "description": "Marketplace for the lukis editorial-illustration skill",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "lukis",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/madearga/lukis-skill.git"
+      },
+      "description": "Original editorial illustrations where a recurring mascot performs the idea — eighteen bundled looks, custom characters, palettes from your own site's colors.",
+      "version": "0.1.0",
+      "strict": true
+    }
+  ]
+}

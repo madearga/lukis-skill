@@ -1,0 +1,19 @@
+NOTICE
+
+Lukis is a fork of **Illo** by Trevin Chow — the engine architecture, the
+reference-doc system, the character-pack format, and the bundled look
+library (including the original riso style definitions) derive from illo
+(https://github.com/tmchow/illo-skill) and remain © Trevin Chow, MIT.
+
+The lukis identity is new work: the **Ciko** default mascot (the house-gecko
+design, its design language, and its model sheet), the **sablon** default
+look, the **pasar** house palette, the renamed command/config surface, and
+adaptation text are © 2026 I Made Arga Swarsa, MIT.
+
+If you redistribute this skill or build derivative works from any part of
+it — code, prompts, reference docs, characters, or example images — please
+retain this notice and both copyrights, and credit "Illo by Trevin Chow"
+and "Lukis by I Made Arga Swarsa".
+
+Characters created with the skill's character builder belong to their
+creators; this notice does not claim them.

@@ -1,0 +1,17 @@
+{
+  "name": "lukis",
+  "version": "0.1.0",
+  "description": "Original editorial illustrations where a recurring mascot performs the idea — eighteen bundled looks, custom characters, palettes from your own site's colors. Ships the lukis Agent Skill and its three-backend image engine: free generation through your Codex or Grok CLI subscription when available, OpenRouter otherwise.",
+  "author": {
+    "name": "I Made Arga Swarsa",
+    "url": "https://github.com/madearga"
+  },
+  "homepage": "https://github.com/madearga/lukis-skill",
+  "repository": "https://github.com/madearga/lukis-skill",
+  "license": "MIT",
+  "keywords": [
+    "lukis",
+    "lukis skill",
+    "editorial illustration"
+  ]
+}
