@@ -1,0 +1,122 @@
+# lukis skill
+
+> Agent skill for turning articles, posts, and abstract ideas into original editorial illustrations with a recurring mascot character.
+
+Site: https://lukis-skill.com/
+Skill repo: https://github.com/madearga/lukis-skill
+Character packs: https://github.com/madearga/lukis-skill (community catalog repo planned; Ciko ships with the skill)
+Examples: https://lukis-skill.com/examples.html
+Guide: https://lukis-skill.com/guide.html
+Characters page: https://lukis-skill.com/characters.html
+Characters JSON: https://lukis-skill.com/characters.json
+Agent instructions: https://lukis-skill.com/agent-instructions.md
+About: https://lukis-skill.com/about
+Contact: https://lukis-skill.com/contact
+Privacy: https://lukis-skill.com/privacy
+
+## When to use this
+
+Reach for the lukis skill when the user says "lukis" and wants an original illustration of an idea, not a search for existing artwork. Best-fit jobs:
+
+- editorial illustrations for writing, posts, or abstract concepts
+- a repeatable mascot/character style instead of stock art
+- a hero image plus inline article images
+- a visual metaphor for a technical or strategic idea
+- a surprise / random image (optionally scoped to a focus or character; `--autopick` for schedulers)
+- an explainer diagram when the structure or flow matters (a flowchart locks labeled stages)
+- a character cutout or transparent mascot sticker for slides or compositing
+- an X Article banner / hero at 1536 × 640
+- custom character packs for a personal or team visual system
+
+The trigger word is "lukis". Never fire on generic "illustrate", "draw", or "make an image" asks.
+
+How an agent should call this: install with **this host's native plugin or skill manager** (table below — Claude Code, Codex, Grok CLI, Gemini CLI, Cursor). Use `npx skills add` only as last resort. Confirm an image backend, then invoke `/lukis <idea>` or matching natural language. Install character packs by name from https://lukis-skill.com/characters.json. There is no image-generation HTTP API — do not invent `/api/render` URLs.
+
+## When not to use this
+
+- Photoreal product shots, headshots, or editing an existing photo
+- Video or animation
+- Stock-art search or someone else's copyrighted characters
+- A hosted image-generation API, webhook, OAuth, or checkout — this origin does not expose those. Catalog lookup is public; rendering is the installed skill.
+
+## What the lukis skill does
+
+lukis skill is an Agent Skills-format agent skill. It reads a short idea, a social post, or a full article and renders in one of four registers:
+
+- **Editorial scenes** (default) — one caught moment; the mascot performs the idea
+- **Mini-comics** — 2–4 panels in a single image when the idea is a story beat (fail→fix, before→after)
+- **Explainer diagrams** — one register for labeled stages, flow, fan-out, timeline, loop, stack, or system slice when the structure is the point
+- **Character cutouts** — transparent PNG of the mascot alone for downstream overlay (pose only, no scene or text)
+
+It also has a **surprise / random mode** for invent-and-render asks ("surprise me", "random"): rolls provenance, builds three saying candidates, lets the user pick or auto-picks with `--autopick`, then renders one image plus a caption-ready line.
+
+Images star a recurring mascot. The default is **Ciko**, a deadpan house gecko (cicak) in **sablon** — hand-pulled screenprint, flat spot-color inks, thick stencil line. Each character pack carries its own bundled print look.
+
+## Install
+
+Prefer the host's **native plugin or skill manager** — same lanes as the [GitHub README](https://github.com/madearga/lukis-skill#install). Use `npx skills add` only when the host has no native lane.
+
+| Platform | Install |
+|---|---|
+| **Claude Code** | `/plugin marketplace add madearga/lukis-skill` then `/plugin install lukis@lukis-skill` |
+| **Codex** | `codex plugin marketplace add madearga/lukis-skill` then `codex plugin add lukis@lukis-skill` |
+| **Grok CLI** | `grok plugin marketplace add madearga/lukis-skill` then `grok plugin install madearga/lukis-skill --trust` |
+| **Gemini CLI** | `gemini extensions install https://github.com/madearga/lukis-skill` |
+| **Cursor / other agents** | `npx skills add madearga/lukis-skill --skill lukis` |
+
+## Requirements
+
+- A coding agent that can read a `SKILL.md` file and run local scripts.
+- Python 3. The engine is a single stdlib Python script.
+- An image backend (one of four; resolved by host capability, or pinned with `--backend`):
+  - Codex backend: uses a signed-in Codex CLI and its built-in image generation (gpt-image-2). No separate API key.
+  - Grok CLI backend: uses a signed-in Grok (xAI) CLI and its built-in image generation. No separate API key. Cannot produce transparent cutouts — cutout renders redirect to Codex or OpenRouter.
+  - Grok Bot backend: uses Grok Bot's built-in Grok image tool. No Grok CLI and no OpenRouter key. Cannot produce transparent cutouts — cutout renders redirect to Codex or OpenRouter.
+  - OpenRouter backend: uses an OpenRouter key stored by `lukis.py init` in `~/.config/lukis/config.yaml` with mode 600. Model-selectable. Also the opt-in paid fallback when a Codex CLI, Grok CLI, or Grok Bot render fails — only with `--allow-paid-fallback` (never automatic spend).
+
+## First commands
+
+```text
+/lukis you are the bottleneck
+/lukis https://yourblog.com/shipping-discipline hero + 3 images
+/lukis surprise me
+/lukis surprise me --autopick using ciko
+/lukis install ciko character pack
+/lukis how a book gets published explainer diagram
+/lukis ciko cutout waving
+/lukis X Article banner for this post
+```
+
+## Characters
+
+Ciko ships with the skill — a deadpan house gecko in sablon on the pasar palette (warm cream paper `#f6ecd9`, structure ink `#1d1a15`, chili red `#d4492e`, leaf teal `#1a6e5f`). Community character packs will live in a dedicated catalog repo (planned; Ciko is the first pack).
+
+Fetch the machine-readable list: `https://lukis-skill.com/characters.json`
+
+Browse the human gallery: `https://lukis-skill.com/characters.html`
+
+Build your own: say `/lukis build a character` for the interactive builder.
+
+## Output guidance
+
+Prefer one strong visual metaphor over many props. Use **editorial scenes** by default. Use a **mini-comic** when the idea is a story beat (fail→fix, before→after) in one place — not a named pipeline. Use an **explainer diagram** when the user asks for flow/structure or when the thesis is labeled stages, a flowchart, a timeline, or another traceable type. Specified flowchart / labeled-workflow intention locks labeled stages inside explainer. Use a **character cutout** only when the deliverable is the mascot alone for overlay — not when the ask needs to explain an idea. Route **surprise / random** asks through surprise mode (not the thin-concept Q&A path): three candidates, picker or `--autopick`, one image + saying.
+
+Character packs couple the character with its visual look. Do not treat style as freely swappable between characters. Looks in the catalog include sablon, riso, blueprint, woodcut, pixel, clay, manila, chalk, phosphor, enamel, gouache, felt, diorama, sketchbook, bricks, fizz, bloom, and snes.
+
+For destination-specific colors, map the target destination to a palette once, often from the destination CSS, then keep the same character and accent placement. For an **X Article banner / hero**, use **1536 × 640** (`1536:640`).
+
+## Troubleshooting
+
+- If no image backend is configured, the engine resolves in order: a usable Codex CLI, else a usable Grok CLI, else Grok Bot host capability, else an OpenRouter key. Outside Grok Bot, run `lukis.py init` to configure OpenRouter when no subscription CLI is signed in.
+- A failed Codex CLI, Grok CLI, or Grok Bot render does not spend OpenRouter money automatically — pass `--allow-paid-fallback` only when the user explicitly permits a paid retry.
+- If a render is off-concept, rerun with a tighter description of the idea and the desired output shape.
+- If a character is unavailable, install its pack by name from the catalog repo once published.
+- If sharing a character, keep private characters local unless the user explicitly wants a community PR.
+
+## MCP status
+
+A catalog-only MCP is planned (not yet live). It will expose `list_character_packs` and `get_character_pack` over the catalog. It will not generate images, install packs, or open PRs. Rendering always happens via the installed skill.
+
+## CLI
+
+The engine is `lukis.py` in https://github.com/madearga/lukis-skill (`skills/lukis/scripts/lukis.py`). There is no npm, PyPI, or Homebrew package that renders images. After install, invoke `/lukis <idea>` or `lukis.py init` for OpenRouter.

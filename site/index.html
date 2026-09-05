@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lukis skill — editorial illustrations with a recurring mascot</title>
+<meta name="description" content="Agent skill for turning articles, posts, and abstract ideas into original editorial illustrations with Ciko, a deadpan house gecko.">
+<style>
+body{font-family:Georgia,serif;max-width:44rem;margin:0 auto;padding:2rem 1.25rem;line-height:1.6;color:#1d1a15;background:#f6ecd9}
+h1{font-size:2.2rem;margin-bottom:.25rem}
+.tagline{font-style:italic;color:#5a5347;margin-top:0}
+h2{margin-top:2.5rem;border-bottom:2px solid #1d1a15;padding-bottom:.25rem}
+code{background:#ece2cb;padding:.1rem .35rem;border-radius:4px;font-size:.9em}
+pre{background:#ece2cb;padding:1rem;border-radius:6px;overflow-x:auto}
+img{max-width:100%;height:auto;border-radius:6px;margin:1rem 0}
+.hero-cap{font-size:.9rem;color:#5a5347;margin-top:-.5rem}
+table{border-collapse:collapse;width:100%;margin:1rem 0}
+td,th{border:1px solid #1d1a15;padding:.4rem .6rem;text-align:left;font-size:.95rem}
+nav{margin:2rem 0}
+nav a{margin-right:1rem;color:#d4492e}
+a{color:#d4492e}
+footer{margin-top:3rem;font-size:.85rem;color:#5a5347}
+</style>
+</head>
+<body>
+<h1>lukis skill</h1>
+<p class="tagline">Agent skill for turning articles, posts, and abstract ideas into original editorial illustrations with a recurring mascot.</p>
+<nav>
+<a href="/guide.html">Guide</a>
+<a href="/examples.html">Examples</a>
+<a href="/characters.html">Characters</a>
+<a href="/llms.txt">llms.txt</a>
+<a href="/agent-instructions.md">Agent instructions</a>
+<a href="https://github.com/madearga/lukis-skill">GitHub</a>
+</nav>
+
+<img src="/assets/hero-many-inputs-one-decision.png" alt="Many inputs become one decision — Ciko holding the merge open">
+<p class="hero-cap">Ciko, a deadpan house gecko, in sablon — hand-pulled screenprint, flat spot-color inks, thick stencil line.</p>
+
+<h2>Registers</h2>
+<ul>
+<li><strong>Editorial scenes</strong> (default) — one caught moment; the mascot performs the idea</li>
+<li><strong>Mini-comics</strong> — 2–4 panels in a single image when the idea is a story beat (fail→fix, before→after)</li>
+<li><strong>Explainer diagrams</strong> — labeled stages, flow, fan-out, timeline, loop, stack, or system slice when the structure is the point</li>
+<li><strong>Character cutouts</strong> — transparent PNG of the mascot alone for overlay (pose only, no scene or text)</li>
+<li><strong>Surprise / random</strong> — invent-and-render when you have no thesis yet</li>
+</ul>
+
+<h2>Install</h2>
+<p>Use the host's native plugin or skill manager. Full table: <a href="/llms.txt">llms.txt</a></p>
+<table>
+<tr><th>Platform</th><th>Install</th></tr>
+<tr><td>Claude Code</td><td><code>/plugin marketplace add madearga/lukis-skill</code> then <code>/plugin install lukis@lukis-skill</code></td></tr>
+<tr><td>Codex</td><td><code>codex plugin marketplace add madearga/lukis-skill</code> then <code>codex plugin add lukis@lukis-skill</code></td></tr>
+<tr><td>Grok CLI</td><td><code>grok plugin marketplace add madearga/lukis-skill</code> then <code>grok plugin install madearga/lukis-skill --trust</code></td></tr>
+<tr><td>Gemini CLI</td><td><code>gemini extensions install https://github.com/madearga/lukis-skill</code></td></tr>
+<tr><td>Cursor / other</td><td><code>npx skills add madearga/lukis-skill --skill lukis</code></td></tr>
+</table>
+<p>Then invoke it:</p>
+<pre>/lukis you are the bottleneck
+/lukis https://yourblog.com/shipping-discipline hero + 3 images
+/lukis surprise me
+/lukis install ciko character pack</pre>
+
+<h2>Trust and contact</h2>
+<ul>
+<li><a href="/about">About lukis skill</a></li>
+<li><a href="/contact">Contact</a></li>
+<li><a href="/privacy">Privacy</a></li>
+</ul>
+
+<footer>lukis skill is an Agent Skills-format skill (MIT). It is not a hosted image API. Install it, then ask your agent to run it. Site catalog lists character packs only.</footer>
+</body>
+</html>

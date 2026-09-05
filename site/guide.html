@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lukis skill — guide</title>
+<meta name="description" content="How to use the lukis skill: registers, backends, characters, and output guidance.">
+<style>
+body{font-family:Georgia,serif;max-width:44rem;margin:0 auto;padding:2rem 1.25rem;line-height:1.6;color:#1d1a15;background:#f6ecd9}
+h1{font-size:2rem}
+h2{margin-top:2.5rem;border-bottom:2px solid #1d1a15;padding-bottom:.25rem}
+code{background:#ece2cb;padding:.1rem .35rem;border-radius:4px;font-size:.9em}
+pre{background:#ece2cb;padding:1rem;border-radius:6px;overflow-x:auto}
+img{max-width:100%;height:auto;border-radius:6px;margin:1rem 0}
+.hero-cap{font-size:.9rem;color:#5a5347;margin-top:-.5rem}
+nav{margin:2rem 0}
+nav a{margin-right:1rem;color:#d4492e}
+a{color:#d4492e}
+footer{margin-top:3rem;font-size:.85rem;color:#5a5347}
+</style>
+</head>
+<body>
+<h1>lukis skill — guide</h1>
+<nav><a href="/">Home</a><a href="/examples.html">Examples</a><a href="/characters.html">Characters</a><a href="/llms.txt">llms.txt</a></nav>
+
+<p>Say <strong>"lukis"</strong> and give the skill an idea, a post, or an article URL. One image explains one idea: a key judgment, a flow, a before/after, a trap, a loop. The default mascot is <strong>Ciko</strong>, a deadpan house gecko, in <strong>sablon</strong> — hand-pulled screenprint on the pasar palette.</p>
+
+<img src="/assets/hero-three-flat-layers.png" alt="Three flat layers — explainer register in sablon">
+<p class="hero-cap">The explainer register: labeled stages, one connected system, hand-built.</p>
+
+<h2>Pick a register</h2>
+<ul>
+<li><strong>Editorial scene</strong> (default): one caught moment, the mascot performing the idea. Best for heroes and single illustrations.</li>
+<li><strong>Mini-comic</strong>: 2–4 panels in one image when the idea is a story beat (fail→fix, before→after). Not for named pipelines.</li>
+<li><strong>Explainer diagram</strong>: labeled stages, flow, fan-out, timeline, loop, stack, or system slice when the structure is the point.</li>
+<li><strong>Character cutout</strong>: the mascot alone on transparency for overlay. Pose only, no scene, no text.</li>
+<li><strong>Surprise / random</strong>: no thesis yet. The skill invents three candidates, you pick (or <code>--autopick</code>), it renders one plus a caption line.</li>
+</ul>
+
+<h2>First commands</h2>
+<pre>/lukis you are the bottleneck
+/lukis https://yourblog.com/shipping-discipline hero + 3 images
+/lukis surprise me
+/lukis surprise me --autopick using ciko
+/lukis how a book gets published explainer diagram
+/lukis ciko cutout waving
+/lukis X Article banner for this post</pre>
+
+<h2>Image backends</h2>
+<p>The engine renders through one of four backends, resolved by host capability or pinned with <code>--backend</code>:</p>
+<ul>
+<li><strong>Codex</strong>: signed-in Codex CLI, built-in image generation. No API key. Default.</li>
+<li><strong>Grok CLI</strong>: signed-in Grok CLI. No API key. No transparent cutouts.</li>
+<li><strong>Grok Bot</strong>: Grok Bot's built-in image tool. No cutouts.</li>
+<li><strong>OpenRouter</strong>: key stored by <code>lukis.py init</code> in <code>~/.config/lukis/config.yaml</code>. Model-selectable. Paid fallback only with <code>--allow-paid-fallback</code>, never automatic.</li>
+</ul>
+
+<h2>Characters and looks</h2>
+<p>Character packs couple one mascot with one print look — never freely swappable. Eighteen bundled looks: sablon, riso, blueprint, woodcut, pixel, clay, manila, chalk, phosphor, enamel, gouache, felt, diorama, sketchbook, bricks, fizz, bloom, snes. Calibrated examples for sablon, riso, woodcut, chalk, and enamel ship in the repo. Say <code>/lukis build a character</code> to design your own.</p>
+
+<h2>Output guidance</h2>
+<ul>
+<li>One strong visual metaphor beats many props.</li>
+<li>Editorial scenes by default; mini-comic for story beats; explainer for traceable structure; cutout for overlay only.</li>
+<li>For an <strong>X Article banner / hero</strong>, use <strong>1536 × 640</strong>.</li>
+</ul>
+
+<footer>Full procedure: the skill's own SKILL.md after install. Machine index: <a href="/llms.txt">llms.txt</a>. Catalog: <a href="/characters.json">characters.json</a>.</footer>
+</body>
+</html>
