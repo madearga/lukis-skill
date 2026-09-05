@@ -8,6 +8,11 @@ screenprinted mid-rebuild on a bridge under live traffic. `/lukis surprise
 me` → one fresh poster, picked from three candidates. `/lukis as labeled
 stages` → the same mascot drawing your pipeline as a hand-built explainer.
 
+*"many inputs become one decision" — Ciko at the gate, in sablon on the
+pasar palette:*
+
+![Many inputs become one decision — Ciko holding the merge open](_assets/lukis/hero-many-inputs-one-decision.png)
+
 - **Out of the box:** Ciko, a deadpan cicak (house gecko), in **sablon** —
   hand-pulled screenprint, flat spot-color inks, thick stencil line.
 - **Eighteen bundled looks** — sablon, riso, woodcut, pixel, clay, chalk,
