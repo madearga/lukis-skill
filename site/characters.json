@@ -1,1 +1,36 @@
-{"characters": [{"description": "a deadpan house gecko (cicak)", "look": "sablon", "name": "ciko", "notes": "the shipped default; house palette pasar", "preview": "https://raw.githubusercontent.com/madearga/lukis-skill/main/_assets/lukis/hero-many-inputs-one-decision.png"}], "install_phrase_template": "/lukis install {name} character pack", "schema_version": "1.0", "site": "https://lukis-skill.com/", "source_repo": "https://github.com/madearga/lukis-characters"}
+{
+ "schema_version": "1.0",
+ "site": "https://lukis-skill.com/",
+ "source_repo": "https://github.com/madearga/lukis-characters",
+ "install_phrase_template": "/lukis install {name} character pack",
+ "characters": [
+  {
+   "name": "ciko",
+   "look": "sablon",
+   "description": "a deadpan house gecko (cicak)",
+   "notes": "the shipped default",
+   "preview": "https://raw.githubusercontent.com/madearga/lukis-characters/main/packs/ciko/preview.png"
+  },
+  {
+   "name": "pijar",
+   "look": "blueprint",
+   "description": "a small light bulb, the moment it clicks",
+   "notes": "",
+   "preview": "https://raw.githubusercontent.com/madearga/lukis-characters/main/packs/pijar/preview.png"
+  },
+  {
+   "name": "pasir",
+   "look": "chalk",
+   "description": "an hourglass watching the time slip by",
+   "notes": "",
+   "preview": "https://raw.githubusercontent.com/madearga/lukis-characters/main/packs/pasir/preview.png"
+  },
+  {
+   "name": "seduh",
+   "look": "gouache",
+   "description": "a coffee mug, good things steeping",
+   "notes": "",
+   "preview": "https://raw.githubusercontent.com/madearga/lukis-characters/main/packs/seduh/preview.png"
+  }
+ ]
+}
