@@ -89,7 +89,7 @@ label. Secondary labels stay smaller and subordinate.
 - Accent appears only on the character's accent part + the light source.
 
 Calibration example (not bundled — fetch the URL):
-https://raw.githubusercontent.com/madearga/lukis-skill/main/_assets/lukis/styles/bloom-pitz.png
+https://raw.githubusercontent.com/tmchow/illo-skill/main/_assets/illo/styles/bloom-pitz.png
 — a flat black-cat loaf at a lamplit desk; study it for the crisp-character /
 soft-deep-ground contrast and the single-light rule. Never copy its composition
 or assume its warm palette is mandatory (bloom works cool and bright too).
