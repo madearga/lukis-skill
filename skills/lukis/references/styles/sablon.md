@@ -58,6 +58,8 @@ marker-through-stencil energy, slightly irregular, confident, never typeset.
   small props.
 - Accent appears only on the character's accent part + 1–2 elements.
 
+Calibration example (not bundled — fetch the URL): https://raw.githubusercontent.com/madearga/lukis-skill/main/_assets/lukis/sablon-poster-drop.png — study it for flat spot-color discipline, the single thick even outline, and accent restraint; never copy its composition.
+
 Variant note: when deriving a sablon pack from a character whose sheet was
 born in another look, the original sheet works directly as the `--ref` — the
 style prompt overrides its rendering.

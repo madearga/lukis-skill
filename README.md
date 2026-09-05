@@ -13,6 +13,10 @@ pasar palette:*
 
 ![Many inputs become one decision — Ciko holding the merge open](_assets/lukis/hero-many-inputs-one-decision.png)
 
+*"three flat layers" — the explainer register, stencil to ink to press, in sablon on the pasar palette:*
+
+![Three flat layers — Ciko pulling a screen-print run](_assets/lukis/hero-three-flat-layers.png)
+
 - **Out of the box:** Ciko, a deadpan cicak (house gecko), in **sablon** —
   hand-pulled screenprint, flat spot-color inks, thick stencil line.
 - **Eighteen bundled looks** — sablon, riso, woodcut, pixel, clay, chalk,
