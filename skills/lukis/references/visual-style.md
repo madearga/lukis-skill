@@ -75,3 +75,5 @@ is crisp, the image fails. Redraw everything in the mascot's line.
 Strange but clean; clear but not instructional; smart, dry, a little deadpan.
 A reader should feel "huh, that's a bit odd" and then get the point within a
 second.
+
+Calibration example (not bundled — fetch the URL): https://raw.githubusercontent.com/madearga/lukis-skill/main/_assets/lukis/riso-sunrise.png — study it for the halftone grain, the ink-layer offset, and accent restraint; never copy its composition.
