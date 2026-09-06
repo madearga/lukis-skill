@@ -1,43 +1,61 @@
 #!/usr/bin/env python3
-"""Lukis — editorial illustration engine + setup. Codex/Grok/OpenRouter, stdlib only.
+"""Lukis — editorial illustration engine.
 
-Subcommands:
-  generate   Render image(s) from a prompt (+ refs); prints a JSON line per image
-             and appends to <out-dir>/manifest.jsonl. --count N for variations.
-             --cutout best-effort transparent PNG for character cutouts (native
-             alpha, chroma key, or opaque fallback; see cutout_alpha in JSON).
+One file, stdlib only. Six subcommands:
+
+  generate   Render image(s) from a prompt (+ refs); prints a JSON line per
+             image and appends to <out-dir>/manifest.jsonl. --count N renders
+             variations. --cutout best-effort transparent PNG for character
+             cutouts (native alpha, chroma key, or opaque fallback; the result
+             is reported in cutout_alpha).
   newrun     Make + print a fresh batch dir: $LUKIS_TMP (or /tmp/lukis) / <runid>.
   gallery    Build a self-contained index.html from a run dir's manifest.jsonl.
   init       Create/update the user config (run by the user; prompts for the key).
   doctor     Preflight: report whether the skill is ready to generate.
   packs      Community character packs: list / show / install / update.
 
-Resolution (generate):
+generate resolution order:
   api key : config "apiKey" only — written by `init` (user-run, mode 600)
-  model   : --model    >  config "model"        >  built-in default
-  aspect  : --aspect   >  config "aspect"
+  model   : --model  >  config "model"  >  built-in default
+  aspect  : --aspect >  config "aspect"
 
-The config file is an OPTIONAL user-level YAML file at
+Config is an OPTIONAL user-level YAML file at
 ${XDG_CONFIG_HOME:-~/.config}/lukis/config.yaml — never commit it. Reading it
-needs PyYAML; if PyYAML is absent, a minimal stdlib parser still reads the
-flat string keys (apiKey, model, …), so generation stays install-free.
-The engine never reads secrets from the environment.
-The agent must NOT enter the key: `init` is run by the user.
+prefers PyYAML; without it, a minimal stdlib parser still reads the flat string
+keys (apiKey, model, …), so generation stays install-free.
+
+Security posture: the engine never reads secrets from the environment, never
+reads a credential file's contents, and holds no token of its own. The Codex
+and Grok backends drive the user's already-logged-in CLI as a subprocess and
+nothing else. The API key is entered only by the user running `init` — an
+agent must never type it.
 """
 import argparse, base64, getpass, json, mimetypes, os, pathlib, re, shutil, struct, subprocess, sys, time
 import urllib.error, urllib.request
 
+# ---------------------------------------------------------------------------
+# Catalog and wire endpoints
+# ---------------------------------------------------------------------------
+
 ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_PACKS_REPO = "https://raw.githubusercontent.com/madearga/lukis-characters/main"
+PROG = pathlib.Path(__file__).name
+SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent
+
 PACK_NAME_RE = re.compile(r"[a-z0-9]+(-[a-z0-9]+)*")
 ALIASES_RE = re.compile(r"^Aliases:\s*(.+)$", re.M)
 CUTOUT_CHROMA_RE = re.compile(r"^Cutout chroma:\s*\*?\*?(green|magenta)\*?\*?\s*$", re.M | re.I)
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
-# Chroma key for --cutout: flat screen outside the character cluster; removed
-# in post with spill suppression. Codex requests native alpha by default; chroma
+
+# ---------------------------------------------------------------------------
+# Cutout pipeline: chroma screens, spill suppression, QA thresholds
+# ---------------------------------------------------------------------------
+
+# --cutout renders the character on a flat screen so post-processing can key it
+# to transparency. Codex is asked for native alpha directly; the chroma screen
 # remains the compatibility path for OpenRouter and explicit --chroma rerolls.
-# Registration-locked cutout prompts keep riso grain inside fills —
-# misregistration halos read as fringe at QA.
+# Cutout prompts keep riso registration locked: misregistration halos read as
+# fringe once the screen is keyed away.
 CHROMA_MAGENTA = (255, 0, 255)
 CHROMA_GREEN = (0, 255, 0)
 CHROMA_KEY = CHROMA_MAGENTA
@@ -46,6 +64,7 @@ CHROMA_SOFT = 20
 CHROMA_SPILL_MIN = 18   # channel dominance over the other two → spill candidate
 CHROMA_SPILL_FLOOR = 45 # ignore tiny channel noise on very dark pixels
 CHROMA_SPILL_STRONG = 30  # dominance this high keys even when G is below floor
+
 NATIVE_ALPHA_OUTPUT_LINE = (
     "OUTPUT FORMAT: return a PNG with a real transparent alpha channel. Every pixel "
     "outside the character and its contact cluster must have alpha 0 — no white, gray, "
@@ -53,91 +72,89 @@ NATIVE_ALPHA_OUTPUT_LINE = (
     "transparency. Keep only the character and its directly connected contact cluster "
     "opaque."
 )
-# Cutout QA hints on a transparent output (warnings, never gate cutout_alpha):
+
+# QA hints for a transparent result (warnings, never a gate on cutout_alpha).
 CUTOUT_ALPHA_MIN_TRANSPARENT = 1000  # enough cleared background to trust the alpha
 CUTOUT_SOFT_EDGE_MAX = 8  # max soft-alpha path length from true transparency
 CUTOUT_ACCENT_HALO_EDGE_FRAC = 0.25  # compact locked accent carriers are not halos
 CUTOUT_FRINGE_WARN = 20   # edge-fringe px worth a QA look
 CUTOUT_EDGE_FRAC = 0.02   # opaque px along the bottom row over this frac of width →
                           # character likely touches/crops the frame (no foot margin)
-# Grok Imagine: best riso quality + cheapest in testing. Note: it is reachable via
-# the API but not in OpenRouter's public /models list, so an account without access
-# 404s — fall back to a catalogued model like google/gemini-3.1-flash-image-preview.
-DEFAULT_MODEL = "x-ai/grok-imagine-image-quality"
-# OpenRouter cutouts: Grok returns JPEG (no alpha/chroma); GPT Image 2 + chroma works.
-CUTOUT_OPENROUTER_MODEL = "openai/gpt-5.4-image-2"
-PROG = pathlib.Path(__file__).name
-SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-# Codex backend: lukis drives the user's already-installed,
-# already-logged-in Codex CLI via `codex exec` to reach its built-in
-# image_generation tool (gpt-image-2, billed to the user's Codex subscription,
-# no API key). lukis handles NO token: it runs no OAuth, reads no ~/.codex/auth.json,
-# and hits no endpoint — the only privileged action is a subprocess call to the
-# user's own CLI. Subprocess to `codex` is the ONE sanctioned exception to the
-# stdlib-over-subprocess rule — a benign call to a known CLI, not a credential read.
-#
-# Grok backend: same shape as Codex — lukis drives the user's already-installed,
-# already-logged-in Grok CLI (`grok -p`, its headless single-turn mode) to reach
-# its built-in image_gen/image_edit tools (billed to the user's Grok/xAI
-# subscription, no API key). lukis handles NO token: it runs no OAuth, reads no
-# ~/.grok/auth.json content, hits no endpoint — the only privileged action is the
-# subprocess call to the user's own CLI, the same sanctioned exception as Codex.
-# Grok returns JPEG with no alpha channel, so it CANNOT produce transparent
-# cutouts; those redirect to a cutout-capable backend (see cmd_generate).
+# ---------------------------------------------------------------------------
+# Backends
+# ---------------------------------------------------------------------------
+
 BACKENDS = ("codex", "grok", "openrouter", "grok-bot")
 # The subscription-CLI backends: no API key, no per-image charge, no --model, and
 # a null cost/id in the manifest (never queried for OpenRouter cost).
 CLI_BACKENDS = ("codex", "grok")
+
+# Grok Imagine is the editorial default: best riso quality and cheapest in
+# testing. It is reachable via the API but absent from OpenRouter's public
+# /models list, so an account without access 404s — fall back to a catalogued
+# model like google/gemini-3.1-flash-image-preview.
+DEFAULT_MODEL = "x-ai/grok-imagine-image-quality"
+# OpenRouter cutouts: Grok returns JPEG (no alpha/chroma); GPT Image 2 + chroma works.
+CUTOUT_OPENROUTER_MODEL = "openai/gpt-5.4-image-2"
+
+# Codex backend: lukis drives the user's installed, logged-in Codex CLI via
+# `codex exec` to reach its built-in image_generation tool (gpt-image-2, billed
+# to the user's Codex subscription, no API key). lukis handles NO token: no
+# OAuth, no reads of ~/.codex/auth.json, no endpoint calls. The subprocess to
+# the user's own CLI is the single sanctioned exception to the
+# stdlib-over-subprocess rule. The Grok backend has the same shape: `grok -p`
+# (headless single-turn) reaching image_gen/image_edit, billed to the user's
+# Grok/xAI subscription. Grok returns JPEG with no alpha channel, so it cannot
+# produce transparent cutouts; those redirect to a cutout-capable backend (see
+# cmd_generate).
+#
 # Config schema version. 2 is the first version that has the backend choice. A
 # config without this key (or below) predates the choice, so the user has never
-# been offered a backend/transport — `generate` hard-stops and tells them to
-# re-run `init` to choose (see _config_is_stale); `init` re-stamps it.
+# been offered a backend/transport — `generate` hard-stops and points them at
+# `init` (see _config_is_stale); `init` re-stamps it.
 CONFIG_VERSION = 2
-# Where the built-in tool drops images when it ignores the requested path. The
-# spike found Orca relocates CODEX_HOME under Library/Application Support, so the
-# adapter resolves $CODEX_HOME at run time and NEVER hardcodes ~/.codex.
+
+# Codex specifics. The built-in tool drops images under $CODEX_HOME
+# (resolved at run time — some managed runtimes relocate it; never hardcode
+# ~/.codex) in generated_images/<session-id>/<image>.png. Codex 0.144 folded
+# artifact handling into the stable `image_generation` feature, replacing the
+# experimental `imagegenext` extension; that feature row is now the whole
+# capability signal.
 CODEX_GENERATED_SUBDIR = "generated_images"
-# Detection commands are short; generation is an agent turn that fires an image
-# tool, so it needs a generous ceiling (seconds).
+CODEX_IMAGE_FEATURE = "image_generation"
+# Detection is short; generation is an agent turn that fires an image tool (seconds).
 CODEX_DETECT_TIMEOUT = 20
 CODEX_EXEC_TIMEOUT = 600
 # Slack on the "file must postdate this exec" floor, for filesystem mtime
 # granularity / clock skew between the wall clock and the file's mtime source.
 CODEX_MTIME_SKEW = 2.0
-# `codex features list` row that means the built-in image tool is reachable.
-# Codex 0.144 folded generated-image artifact handling into this stable feature
-# (see image_generation_artifact_path / ImageGenerationItem.saved_path upstream)
-# and removed the earlier experimental `imagegenext` extension lukis used to
-# force artifact emission on 0.141, so this row is now the whole capability
-# signal — `codex exec` drops
-# $CODEX_HOME/generated_images/<session-id>/<image>.png on its own.
-CODEX_IMAGE_FEATURE = "image_generation"
-# Grok backend: `grok -p` is the headless single-turn mode (equivalent of
-# `codex exec`); the agent fires image_gen/image_edit and saves to a path.
+
+# Grok specifics. The agent saves to the requested path; when it produces the
+# image without copying, the raw artifact sits in
+# $GROK_HOME/sessions/<url-encoded-cwd>/<session-uuid>/images/ (resolved at run
+# time; GROK_HOME is a path, not a secret).
 GROK_EXEC_TIMEOUT = 600
-# Grok drops the raw image_gen artifact here before the agent copies it to the
-# requested path: $GROK_HOME/sessions/<url-encoded-cwd>/<session-uuid>/images/.
-# Resolved at run time; GROK_HOME is a path, not a secret, so reading it is allowed.
 GROK_SESSIONS_SUBDIR = "sessions"
 GROK_MTIME_SKEW = 2.0
-# Secret-shaped tokens we strip from any captured subprocess output before it
+
+# Secret-shaped tokens stripped from any captured subprocess output before it
 # could reach a terminal (redact, never print raw stdout/stderr).
 SECRET_RE = re.compile(r"\b(sk-[A-Za-z0-9_-]{8,}|eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_.-]+)")
 
 
 class BackendUnavailable(Exception):
-    """A backend could not produce an image for a non-fatal reason (Codex CLI
-    missing/logged-out, `codex exec` errored or timed out, unsupported platform,
-    or OpenRouter returned no image after a retry). cmd_generate catches this so
-    it can fail cleanly or use an explicitly authorized fallback; it is NOT a
-    hard caller error (those stay `sys.exit`)."""
+    """A backend could not produce an image for a non-fatal reason: CLI missing
+    or logged out, the exec call errored or timed out, unsupported platform, or
+    OpenRouter returned no image after a retry. cmd_generate catches this to
+    fail cleanly or use an explicitly authorized fallback; hard caller errors
+    stay `sys.exit`."""
 
 
 def redact(text):
-    """Mask secret-shaped substrings in captured subprocess output. Codex output
-    should never carry a token, but redact defensively so a stray bearer/key in a
-    diagnostic line cannot be echoed to the terminal or a transcript."""
+    """Mask secret-shaped substrings in captured subprocess output. A backend's
+    output should never carry a token; redact defensively so a stray bearer/key
+    in a diagnostic line cannot reach the terminal or a transcript."""
     return SECRET_RE.sub("<redacted>", text or "")
 
 
@@ -148,11 +165,11 @@ def _codex_binary():
 
 
 def _codex_run(args):
-    """Run a short `codex` subcommand and return (rc, combined-output). Any
+    """Run a short `codex` subcommand and return (rc, combined-output). Every
     failure mode — missing binary, non-zero exit, timeout — collapses to a
-    non-zero rc so callers can treat detection failures as soft (return False),
-    never crash. Output is captured (text) for parsing; callers redact before
-    printing. Reads no env var and no credential file."""
+    non-zero rc so callers treat detection failures as soft (return False),
+    never a crash. Output is captured for parsing; callers redact before
+    printing. Reads no credential file and no secret-shaped env var."""
     try:
         proc = subprocess.run(
             [_codex_binary()] + args, capture_output=True, text=True,
@@ -167,10 +184,10 @@ _CODEX_AVAILABLE = None  # per-process cache so detection's subprocesses run onc
 
 def codex_available():
     """True iff the host has a USABLE Codex CLI: `codex` on PATH, logged in, and
-    the built-in image_generation feature available. Eligibility is a property of
-    the execution host, detected — never assumed. Soft-fails to False on any
-    non-zero exit, timeout, or unparseable output (→ OpenRouter); reads NO
-    credential file and NO secret-shaped env var. Cached per process."""
+    the built-in image_generation feature available. Eligibility is a property
+    of the execution host, detected — never assumed. Soft-fails to False on any
+    non-zero exit, timeout, or unparseable output (→ OpenRouter). Cached per
+    process."""
     global _CODEX_AVAILABLE
     if _CODEX_AVAILABLE is not None:
         return _CODEX_AVAILABLE
@@ -194,8 +211,7 @@ def _detect_codex():
 
 def grok_home():
     """Grok's data dir ($GROK_HOME, default ~/.grok) — holds auth.json and the
-    per-session image cache. A path, not a secret, so resolving it is allowed;
-    lukis never reads the credential file's contents."""
+    per-session image cache. A path, not a secret; its contents are never read."""
     return pathlib.Path(os.environ.get("GROK_HOME") or os.path.expanduser("~/.grok"))
 
 
@@ -208,18 +224,20 @@ _GROK_AVAILABLE = None  # per-process cache
 
 def grok_available():
     """True iff the host has a USABLE Grok CLI: `grok` on PATH and a login
-    credential present (auth.json exists). Login is detected by the credential
-    file's *existence* — never its contents (scanner-clean: no secret read, no
-    secret-shaped env var). The image tools' reachability can't be probed without
-    a billed call, so a logged-out or image-ineligible account fails cleanly at
-    generate time (and only uses paid fallback when explicitly allowed), never
-    here. Cached."""
+    credential present. Login is detected by auth.json's *existence* — never its
+    contents. Image-tool reachability can't be probed without a billed call, so
+    a logged-out or image-ineligible account fails cleanly at generate time (and
+    only uses paid fallback when explicitly allowed), never here. Cached."""
     global _GROK_AVAILABLE
     if _GROK_AVAILABLE is not None:
         return _GROK_AVAILABLE
     _GROK_AVAILABLE = bool(shutil.which("grok")) and (grok_home() / "auth.json").is_file()
     return _GROK_AVAILABLE
 
+
+# ---------------------------------------------------------------------------
+# User config (~/.config/lukis/config.yaml)
+# ---------------------------------------------------------------------------
 
 def config_dir():
     base = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
@@ -389,6 +407,10 @@ def resolve_backend(cfg, override=None):
     return None  # none configured → caller routes to onboarding
 
 
+# ---------------------------------------------------------------------------
+# Image bytes: wire helpers, PNG/JPEG probing, minimal PNG codec
+# ---------------------------------------------------------------------------
+
 def data_url(path):
     p = pathlib.Path(path)
     mime = mimetypes.guess_type(p.name)[0] or "image/png"
@@ -538,6 +560,10 @@ def _parse_png_rgb_or_rgba(data):
             rgba[i * 4:(i + 1) * 4] = pixels[i * 3:(i + 1) * 3] + b"\xff"
     return width, height, bytes(rgba)
 
+
+# ---------------------------------------------------------------------------
+# Cutout: chroma keying, spill suppression, alpha QA
+# ---------------------------------------------------------------------------
 
 def _spill_dominance(r, g, b):
     """How much one channel exceeds the other two — screen-color halo on edges."""
@@ -1057,11 +1083,11 @@ def run_base():
 
 
 def openrouter_generate(model, content, key, image_config=None):
-    """OpenRouter backend (the dispatch seam). Returns (img_bytes, partial_record) for
-    cmd_generate to place; the wire payload is byte-identical to the pre-refactor
-    path. Hard caller errors (no usable response, fatal HTTP) stay `sys.exit`; a
-    "no image after retry" outcome raises BackendUnavailable so it can fall
-    through to another backend instead of killing the run."""
+    """OpenRouter backend (the dispatch seam). Returns (img_bytes, partial_record)
+    for cmd_generate to place. Hard caller errors (no usable response, fatal
+    HTTP) stay `sys.exit`; a "no image after retry" outcome raises
+    BackendUnavailable so it can fall through to another backend instead of
+    killing the run."""
     try:
         payload = post_chat(model, content, key, ["image", "text"], image_config)
     except urllib.error.HTTPError as e:
@@ -1088,6 +1114,10 @@ def openrouter_generate(model, content, key, image_config=None):
     gid = payload.get("id")
     return img, {"model": model, "id": gid}
 
+
+# ---------------------------------------------------------------------------
+# Backends: Codex (`codex exec`) and Grok (`grok -p`)
+# ---------------------------------------------------------------------------
 
 def _codex_thread_id(output):
     """Return a safe thread id from `codex exec --json` JSONL, or None.
@@ -1117,15 +1147,14 @@ def _codex_thread_id(output):
 def _freshest_generated_image(since, exclude=None, thread_id=None):
     """Newest $CODEX_HOME/generated_images/<session-id>/<image> that postdates
     `since` (a wall-clock float captured just before this exec ran), or None.
-    The recency floor is mandatory: the dir is shared across renders and across
-    concurrent codex sessions, so without it the agent failing to produce a new
-    image (a non-deterministic miss) would silently return a leftover from
-    a previous render or a foreign session — a duplicate in a --count batch, or
-    the wrong illustration tagged success. A small CODEX_MTIME_SKEW slack
-    tolerates mtime granularity / clock skew. Resolves CODEX_HOME (env, default
-    ~/.codex) at run time and NEVER hardcodes ~/.codex — the spike found Orca
-    relocates it. CODEX_HOME is a path, not secret-shaped, so reading it
-    is allowed.
+
+    The recency floor is mandatory. The dir is shared across renders and across
+    concurrent codex sessions, so when the model fails to produce a new image
+    (a non-deterministic miss) a stale file must not pass as this run's result —
+    that would be a duplicate in a --count batch, or the wrong illustration
+    tagged success. CODEX_MTIME_SKEW tolerates mtime granularity and clock skew.
+    CODEX_HOME resolves from the environment at run time (managed runtimes
+    relocate it); it is a path, never hardcoded, and never secret-shaped.
 
     When `thread_id` came from the exec's validated `thread.started` event,
     only that exact session directory is searched. Otherwise `exclude` holds
@@ -1171,9 +1200,9 @@ def _valid_image_file(path):
 
 
 def codex_exec_generate(prompt, refs, out_path):
-    """Codex backend: drive the user's `codex exec` against
-    its built-in image_generation tool (gpt-image-2, no API key, no per-image
-    charge). Returns (produced_file_path, partial_record). Sends NO model id —
+    """Codex backend: drive the user's `codex exec` against its built-in
+    image_generation tool (gpt-image-2, no API key, no per-image charge).
+    Returns (produced_file_path, partial_record). Sends NO model id —
     gpt-image-2 is automatic on the free built-in tool, so --model never
     applies here. A valid fresh artifact is authoritative even when the wrapper
     exits non-zero or times out; only a run with no valid artifact raises
@@ -1186,9 +1215,9 @@ def codex_exec_generate(prompt, refs, out_path):
     run_dir = out.parent
     run_dir.mkdir(parents=True, exist_ok=True)
     # The free built-in tool takes no size argument, so aspect must live in the
-    # prompt text — lukis already states it. The spike proved positional prompts
-    # break in loops, so feed the FULL prompt via STDIN ('-' mode) and instruct
-    # the agent to save to a path inside run_dir.
+    # prompt text — lukis already states it. Positional prompts break in loops,
+    # so feed the FULL prompt via STDIN ('-' mode) and instruct the agent to
+    # save to a path inside run_dir.
     stdin_prompt = (f"{prompt}\n\n"
                     f"Use your built-in image generation tool to render this, "
                     f"then save the resulting image to {out} "
@@ -1196,7 +1225,7 @@ def codex_exec_generate(prompt, refs, out_path):
     cmd = [_codex_binary(), "exec", "--json", "--cd", str(run_dir),
            "--sandbox", "workspace-write", "--skip-git-repo-check"]
     # Attach every reference: the active character sheet, plus any finished-look
-    # style anchor lukis passes for within-set consistency. codex exec -i
+    # style anchor lukis passes for within-set consistency. `codex exec -i`
     # repeats, so a second --ref is no longer silently dropped.
     for r in refs:
         cmd += ["-i", str(r)]
@@ -1257,8 +1286,8 @@ def codex_exec_generate(prompt, refs, out_path):
 
 def _freshest_grok_image(since):
     """Newest image under $GROK_HOME/sessions/**/images/ that postdates `since`
-    (a wall-clock float captured just before this run), or None. Same rationale as
-    the Codex finder: the cache is shared across renders and sessions, so the
+    (a wall-clock float captured just before this run), or None. Same rationale
+    as the Codex finder: the cache is shared across renders and sessions, so the
     recency floor stops a stale or foreign artifact from passing as this run's
     output. Only the verify-first path (agent saved to --out) normally fires;
     this is the fallback when the agent produced an image but didn't copy it."""
@@ -1266,9 +1295,9 @@ def _freshest_grok_image(since):
     if not root.is_dir():
         return None
     floor = since - GROK_MTIME_SKEW
-    # Match the documented fixed depth (sessions/<enc-cwd>/<uuid>/images/*) with a
-    # bounded glob, not an rglob over all session history — the tree grows without
-    # bound and only files from the last GROK_MTIME_SKEW seconds can ever qualify.
+    # Match the documented fixed depth (sessions/<enc-cwd>/<uuid>/images/*) with
+    # a bounded glob, not an rglob over all session history — the tree grows
+    # without bound and only files from the last GROK_MTIME_SKEW seconds qualify.
     recent = []
     for f in root.glob("*/*/images/*"):
         if f.is_file() and f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp"):
@@ -1281,14 +1310,14 @@ def _freshest_grok_image(since):
 
 
 def grok_exec_generate(prompt, refs, out_path):
-    """Grok backend: drive the user's `grok -p` (headless single-turn) against its
-    built-in image_gen/image_edit tools (billed to the user's Grok subscription,
-    no API key). Returns (produced_file_path, partial_record). Sends NO model id —
-    the image tool is not the chat model, so --model never applies here. Every
-    failure (CLI unusable, exit non-zero, timeout, no image) raises
-    BackendUnavailable so the caller can fail cleanly or use an explicitly
-    authorized fallback. lukis handles no token; the only privileged action is
-    this subprocess to the user's own CLI."""
+    """Grok backend: drive the user's `grok -p` (headless single-turn) against
+    its built-in image_gen/image_edit tools (billed to the user's Grok
+    subscription, no API key). Returns (produced_file_path, partial_record).
+    Sends NO model id — the image tool is not the chat model, so --model never
+    applies here. Every failure (CLI unusable, exit non-zero, timeout, no image)
+    raises BackendUnavailable so the caller can fail cleanly or use an
+    explicitly authorized fallback. lukis handles no token; the only privileged
+    action is this subprocess to the user's own CLI."""
     if not grok_available():
         raise BackendUnavailable("Grok CLI not usable (not installed or logged out).")
     out = pathlib.Path(out_path).resolve()
@@ -1312,8 +1341,7 @@ def grok_exec_generate(prompt, refs, out_path):
     # Confine the auto-approved agent: --sandbox workspace lets it write only to
     # CWD/tmp/~/.grok (network stays open for the image call), so an instruction
     # injected via the prompt content can't reach the wider filesystem. Grok's
-    # sandbox is OFF by default, so this must be explicit — the analog of the
-    # Codex path's --sandbox workspace-write.
+    # sandbox is OFF by default, so this must be explicit.
     cmd = [_grok_binary(), "-p", single_prompt, "--always-approve",
            "--sandbox", "workspace", "--cwd", str(run_dir)]
     # Clear any prior file at the target so the verify-first branch can't accept a
@@ -1352,6 +1380,10 @@ def place_image(img_bytes, out_path, cutout=False, chroma_key=CHROMA_MAGENTA):
     path, w, h = _place_opaque(img_bytes, out_path)
     return path, w, h, {}
 
+
+# ---------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------
 
 def cmd_generate(args):
     cfg = load_config()
@@ -1451,9 +1483,9 @@ def _render_one(backend, cfg, prompt, model, refs, want_cost, out_path,
     sniff_ext, and additive `backend` field live here, never in a backend."""
     # Resolve references once (with the default-character fallback) so every path
     # attaches the same sheet — CLI, direct OpenRouter, and the CLI→OpenRouter
-    # fallback/redirect alike. Resolving only inside the CLI branch let a ref-less
-    # cutout that lands on OpenRouter (e.g. a Grok cutout redirect) lose the
-    # character lock the CLI branch would have kept.
+    # fallback/redirect alike. Resolving only inside the CLI branch once let a
+    # ref-less cutout that landed on OpenRouter (e.g. a Grok cutout redirect)
+    # lose the character lock the CLI branch kept.
     refs = _resolve_refs(refs, cfg)
     if backend in CLI_BACKENDS:
         gen = codex_exec_generate if backend == "codex" else grok_exec_generate
@@ -1496,11 +1528,12 @@ def _render_one(backend, cfg, prompt, model, refs, want_cost, out_path,
         rec = _apply_cutout_meta(rec, cutout_meta)
         rec["prompt"] = prompt
         return rec
-    rec = _openrouter_record(cfg, prompt, model, refs, want_cost, out_path,
-                             cutout=cutout, image_config=image_config,
-                             chroma_key=chroma_key)
-    rec["prompt"] = prompt
-    return rec
+    else:
+        rec = _openrouter_record(cfg, prompt, model, refs, want_cost, out_path,
+                                 cutout=cutout, image_config=image_config,
+                                 chroma_key=chroma_key)
+        rec["prompt"] = prompt
+        return rec
 
 
 def _openrouter_record(cfg, prompt, model, refs, want_cost, out_path,
@@ -1654,6 +1687,10 @@ def _maybe_offer_grok(cfg):
         cfg.pop("backend", None)
     return True
 
+
+# ---------------------------------------------------------------------------
+# Character packs
+# ---------------------------------------------------------------------------
 
 def character_packs(cdir):
     """{name: pack-dir} for each characters/<name>/ holding a character.md."""
