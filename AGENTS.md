@@ -10,11 +10,14 @@ plugin manifests in this repo (`.claude-plugin/`, `.codex-plugin/`,
 This guide is for anyone (human or agent) editing the repo. Keep it accurate
 when conventions change.
 
-Lukis is an identity fork of
-[tvchow's illo](https://github.com/tmchow/illo-skill) (MIT © Trevin Chow):
-the engine and methodology are shared infrastructure; the name, mascot
-(Ciko), default look (sablon), and house palette (pasar) are new. See
-`skills/lukis/NOTICE` for attribution rules.
+Lukis descends from
+[tvchow's illo](https://github.com/tmchow/illo-skill) (MIT © Trevin Chow): it
+began as an identity fork, and the engine (`skills/lukis/scripts/lukis.py`)
+has since been rewritten in this repository. The architecture, methodology,
+and reference-doc system still follow illo's design and are credited in
+`skills/lukis/NOTICE` — the notice is a license obligation, not branding, and
+stays. The name, mascot (Ciko), default look (sablon), and house palette
+(pasar) are lukis-original.
 
 ## Repo layout
 
@@ -73,8 +76,10 @@ update through its release PR. Tags are `v<version>`.
 
 ## Community character packs
 
-`DEFAULT_PACKS_REPO` in `skills/lukis/scripts/lukis.py` points at the shared
-community catalog (`tmchow/illo-characters`) — packs carry their own styles,
-so they render correctly under lukis. Override per user with the
-`packsRepo` config key; a lukis-native catalog can replace the default
-later without breaking installed packs.
+`DEFAULT_PACKS_REPO` in `skills/lukis/scripts/lukis.py` points at the
+lukis-native catalog (`madearga/lukis-characters`) — packs carry their own
+styles, so they render correctly under lukis. The upstream illo catalog
+(`tmchow/illo-characters`) stays installable via `packs install --repo
+https://raw.githubusercontent.com/tmchow/illo-characters/main <name>` (or
+`--all`); every style its packs use is bundled here. Override per user with
+the `packsRepo` config key.

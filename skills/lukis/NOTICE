@@ -1,19 +1,23 @@
 NOTICE
 
-Lukis is a fork of **Illo** by Trevin Chow — the engine architecture, the
-reference-doc system, the character-pack format, and the bundled look
-library (including the original riso style definitions) derive from illo
-(https://github.com/tmchow/illo-skill) and remain © Trevin Chow, MIT.
+Lukis descends from **Illo** by Trevin Chow
+(https://github.com/tmchow/illo-skill, MIT): it began as an identity fork,
+and the engine has since been rewritten in this repository. The derivation
+remains and is credited: the engine's architecture and behavior contract, the
+reference-doc system, the character-pack format, and parts of the bundled
+look library (including the original riso style definitions) come from illo
+and remain © Trevin Chow, MIT.
 
-The lukis identity is new work: the **Ciko** default mascot (the house-gecko
-design, its design language, and its model sheet), the **sablon** default
-look, the **pasar** house palette, the renamed command/config surface, and
-adaptation text are © 2026 I Made Arga Swarsa, MIT.
+The lukis identity is original work: the **Ciko** default mascot (the
+house-gecko design, its design language, and its model sheet), the **sablon**
+default look, the **pasar** house palette, and all adaptation text are
+© 2026 I Made Arga Swarsa, MIT.
 
-If you redistribute this skill or build derivative works from any part of
-it — code, prompts, reference docs, characters, or example images — please
-retain this notice and both copyrights, and credit "Illo by Trevin Chow"
-and "Lukis by I Made Arga Swarsa".
+If you redistribute this skill or build derivative works from any part of it
+— code, prompts, reference docs, characters, or example images — keep this
+notice intact and credit both "Illo by Trevin Chow" and "Lukis by I Made
+Arga Swarsa".
 
 Characters created with the skill's character builder belong to their
-creators; this notice does not claim them.
+creators; this notice claims none of them. Third-party character packs carry
+their own credit lines and license terms — respect them when redistributing.

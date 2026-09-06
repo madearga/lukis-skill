@@ -45,12 +45,13 @@ Full docs, engines, models, and cost: **[skills/lukis/README.md](skills/lukis/RE
 
 ## Credits
 
-Lukis is an identity fork of [tmchow/illo-skill](https://github.com/tmchow/illo-skill)
-(MIT © Trevin Chow) — engine architecture, methodology, and the bundled
-look library derive from illo. The lukis identity (name, the **Ciko**
-mascot, the **sablon** default look, the **pasar** palette) is new work ©
-I Made Arga Swarsa. Both copyrights are preserved in
-[LICENSE](LICENSE) and [skills/lukis/NOTICE](skills/lukis/NOTICE) — keep
-them if you redistribute.
+Lukis descends from [tmchow/illo-skill](https://github.com/tmchow/illo-skill)
+(MIT © Trevin Chow): it began as an identity fork, and the engine has since
+been rewritten in this repository. The architecture, methodology, and parts
+of the bundled look library still derive from illo. The lukis identity (name,
+the **Ciko** mascot, the **sablon** default look, the **pasar** palette) is
+original work © I Made Arga Swarsa. Both copyrights live in
+[LICENSE](LICENSE) and [skills/lukis/NOTICE](skills/lukis/NOTICE) — keep them
+if you redistribute.
 
 MIT licensed.

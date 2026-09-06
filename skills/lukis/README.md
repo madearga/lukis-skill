@@ -249,12 +249,14 @@ images live in [`_assets/lukis/`](../../_assets/lukis/) at the repo root
 
 ## License & credit
 
-MIT. Lukis is an identity fork of **Illo** by Trevin Chow — the engine and
-methodology derive from
-[illo-skill](https://github.com/tmchow/illo-skill); the Ciko mascot, the
-sablon look, and the pasar palette are new work. If you redistribute or
-build on it, keep attribution — see [`NOTICE`](NOTICE). Characters you
-create with the character builder are, of course, yours.
+MIT. Lukis descends from **Illo** by Trevin Chow
+([illo-skill](https://github.com/tmchow/illo-skill)) — it began as an
+identity fork and the engine has since been rewritten here, but the
+architecture, methodology, and parts of the look library still derive from
+illo and are credited in [`NOTICE`](NOTICE). The Ciko mascot, the sablon
+look, and the pasar palette are lukis-original. If you redistribute or build
+on it, keep attribution. Characters you create with the character builder
+are, of course, yours.
 
 ---
 
