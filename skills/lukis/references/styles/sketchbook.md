@@ -104,7 +104,5 @@ detailed paragraphs (they mangle), never on a colored fill.
   accent hue in words next to the hex; color never spreads into the warm field.
 - Silhouette reads as one clean shape at small size.
 
-Calibration example: none bundled yet — study the community sketchbook packs in
-[`illo-characters`](https://github.com/tmchow/illo-characters) (`coil`, `relay`,
-`marshal`, `cook`) for line/hatching, chibi proportions and accent restraint;
-never copy their compositions.
+Calibration example (not bundled — fetch the URL): https://raw.githubusercontent.com/madearga/lukis-skill/main/_assets/lukis/sketchbook-invent.png — study it for
+line/hatching, chibi proportions and accent restraint; never copy its composition.

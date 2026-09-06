@@ -90,7 +90,5 @@ tiny detailed lettering (it mangles), never on a colored fill.
 - Silhouette reads as one clean shape at small size; layer count stays in the
   locked band (no detail creep into loose parts).
 
-Calibration example: none bundled yet — study the community felt packs in
-[`illo-characters`](https://github.com/tmchow/illo-characters) (`quill`,
-`plume`, `posy`, `pleat`) for line/texture and accent restraint; never copy
-their compositions.
+Calibration example (not bundled — fetch the URL): https://raw.githubusercontent.com/madearga/lukis-skill/main/_assets/lukis/felt-nest.png — study it for
+line/texture and accent restraint; never copy its composition.

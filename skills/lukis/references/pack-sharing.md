@@ -113,7 +113,7 @@ SKILL.md step 5); convert before publishing (`sips -s format png in.jpg
 
    | Model sheet | In action |
    |---|---|
-   | ![model sheet](https://raw.githubusercontent.com/<fork-owner>/illo-characters/add-<name>/packs/<name>/reference.png) | ![preview](https://raw.githubusercontent.com/<fork-owner>/illo-characters/add-<name>/packs/<name>/preview.png) |
+   | ![model sheet](https://raw.githubusercontent.com/<fork-owner>/lukis-characters/add-<name>/packs/<name>/reference.png) | ![preview](https://raw.githubusercontent.com/<fork-owner>/lukis-characters/add-<name>/packs/<name>/preview.png) |
 
    <Only if the design diverges from the house family look (a mouth, a
    different body plan, a material body): one line naming what diverges

@@ -93,7 +93,5 @@ mangles), never on a busy painted fill.
   part carries the accent hue — force the hue next to the hex; it never spreads.
 - One clean silhouette that still reads at small size.
 
-Calibration example: none bundled in-skill — study the community diorama packs
-in [`illo-characters`](https://github.com/tmchow/illo-characters) (`wick`,
-`spritz`, `whorl`) for line/wash/texture and accent restraint; never copy their
-compositions.
+Calibration example (not bundled — fetch the URL): https://raw.githubusercontent.com/madearga/lukis-skill/main/_assets/lukis/diorama-tender.png — study it
+for line/wash/texture and accent restraint; never copy its composition.

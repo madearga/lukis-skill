@@ -84,10 +84,9 @@ calmer look instead.
   carries the accent hue (force the hue next to the hex; it never spreads).
 - One clean silhouette that still reads at small size.
 
-Calibration example: none bundled in-skill — study the community fizz packs in
-[`illo-characters`](https://github.com/tmchow/illo-characters) (`kick`, `pop`,
-`boom`) for the line weight, flat loud fills and energy-mark restraint; never
-copy their compositions.
+Calibration example (not bundled — fetch the URL): https://raw.githubusercontent.com/madearga/lukis-skill/main/_assets/lukis/fizz-pop.png — study it
+for the line weight, flat loud fills and energy-mark restraint; never copy its
+composition.
 
 Variant note: a flat riso/illustrated sheet can be reused as `--ref` for a fizz
 pack — the style prompt re-renders it in the fizz look. As always, lock the

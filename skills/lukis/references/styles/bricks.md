@@ -99,10 +99,9 @@ or photographic real-world environment is the signature failure.
 - Generic brick construction — no trademarked minifig trade dress, no real-brand
   logos on the studs.
 
-Calibration example: none bundled in-skill — study the community bricks packs in
-[`illo-characters`](https://github.com/tmchow/illo-characters) (`fathom`,
-`orbit`, `klaxon`) for the brick-built world, accent restraint and toy-photo
-lighting; never copy their compositions.
+Calibration example (not bundled — fetch the URL): https://raw.githubusercontent.com/madearga/lukis-skill/main/_assets/lukis/bricks-haul.png — study it
+for the brick-built world, accent restraint and toy-photo lighting; never copy
+its composition.
 
 Variant note: a bricks pack can't reuse a flat illustrated sheet as `--ref` —
 the character must be re-built as a brick minifig and the model sheet shot as a
